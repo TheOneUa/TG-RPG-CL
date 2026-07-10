@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>TG-RPG v5.4.1</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+
+<!-- СПЛЭШ ЭКРАН -->
+<div id="splash-screen">
+    <div id="splash-image">
+        <img id="splash-img" alt="">
+        <span class="splash-emoji" id="splash-emoji">⚔️</span>
+    </div>
+    <div id="splash-title">TG-RPG</div>
+    <div id="splash-subtitle">Fantasy Adventure</div>
+    <div id="splash-progress"><div id="splash-progress-bar"></div></div>
+</div>
+
+<!-- ГЛАВНОЕ МЕНЮ -->
+<div id="menu-screen">
+    <div class="menu-logo">⚔️</div>
+    <div class="menu-title">TG-RPG</div>
+    <div class="menu-user" id="menu-user">Гость</div>
+    
+    <div class="menu-save-card" id="menu-save-card" style="display:none">
+        <div class="save-title">💾 Сохранение</div>
+        <div class="save-hero" id="menu-hero-name">Герой</div>
+        <div class="save-meta">
+            <span id="menu-save-level">Ур. 1</span>
+            <span id="menu-save-depth">Глубина: 0</span>
+        </div>
+    </div>
+
+    <button class="menu-btn menu-btn-primary" id="menu-continue" style="display:none">
+        <span class="btn-icon">▶️</span>
+        <span class="btn-text">Продолжить<span class="btn-sub">Загрузить сохранение</span></span>
+    </button>
+
+    <button class="menu-btn menu-btn-secondary" id="menu-new">
+        <span class="btn-icon">✨</span>
+        <span class="btn-text" id="menu-new-text">Новая игра<span class="btn-sub">Создать нового героя</span></span>
+    </button>
+
+    <button class="menu-btn menu-btn-danger" id="menu-delete" style="display:none">
+        <span class="btn-icon">🗑️</span>
+        <span class="btn-text">Удалить сохранение</span>
+    </button>
+
+    <button class="menu-btn menu-btn-settings" id="menu-settings">
+        <span class="btn-icon">⚙️</span>
+        <span class="btn-text">Настройки<span class="btn-sub">Звук и вибрация</span></span>
+    </button>
+
+    <button class="menu-btn menu-btn-admin" id="menu-admin">
+        <span class="btn-icon">🛠️</span>
+        <span class="btn-text">Админ-панель<span class="btn-sub">Настройка спрайтов и имён</span></span>
+    </button>
+
+    <div class="menu-version" id="menu-version">v5.0.2</div>
+</div>
+
+<!-- IFRAME ОВЕРЛЕЙ АДМИН-ПАНЕЛИ -->
+<div id="admin-overlay">
+    <div class="admin-overlay-bar">
+        <span>🛠️ Админ-панель</span>
+        <button id="admin-overlay-close">✕ Закрыть</button>
+    </div>
+    <iframe id="admin-frame" src="" allowfullscreen></iframe>
+</div>
+
+<!-- ПИНКОД ДЛЯ ВХОДА В АДМИНКУ -->
+<div id="admin-pin-screen">
+    <div class="admin-pin-title">🛠️ Админ-панель</div>
+    <div class="admin-pin-sub">Введите пинкод</div>
+    <div class="admin-pin-display" id="admin-pin-display">
+        <div class="apd" id="apd0"></div>
+        <div class="apd" id="apd1"></div>
+        <div class="apd" id="apd2"></div>
+        <div class="apd" id="apd3"></div>
+    </div>
+    <div class="admin-pin-pad">
+        <div class="apk" data-n="1">1</div>
+        <div class="apk" data-n="2">2</div>
+        <div class="apk" data-n="3">3</div>
+        <div class="apk" data-n="4">4</div>
+        <div class="apk" data-n="5">5</div>
+        <div class="apk" data-n="6">6</div>
+        <div class="apk" data-n="7">7</div>
+        <div class="apk" data-n="8">8</div>
+        <div class="apk" data-n="9">9</div>
+        <div class="apk apk-back" data-n="back">⌫</div>
+        <div class="apk" data-n="0">0</div>
+        <div class="apk apk-cancel" data-n="cancel">✕</div>
+    </div>
+    <div class="admin-pin-error" id="admin-pin-error"></div>
+</div>
+
+<!-- ЭКРАН НАСТРОЕК -->
+<div id="settings-screen">
+    <div class="settings-header">
+        <button id="settings-back" class="settings-back-btn">← Назад</button>
+        <div class="settings-title">⚙️ Настройки</div>
+    </div>
+
+    <div class="settings-body">
+
+        <div class="settings-section-title">🔊 Звук</div>
+
+        <div class="settings-row">
+            <div class="settings-label">
+                <span class="settings-label-icon">🔈</span>
+                <span>Громкость</span>
+            </div>
+            <div class="settings-control">
+                <span class="slider-val" id="vol-val">80%</span>
+                <input type="range" id="vol-slider" min="0" max="100" value="80" class="settings-slider">
+            </div>
+        </div>
+
+        <div class="settings-row">
+            <div class="settings-label">
+                <span class="settings-label-icon" id="sound-toggle-icon">🔔</span>
+                <span>Звук</span>
+            </div>
+            <div class="settings-control">
+                <button class="toggle-btn active" id="sound-toggle">ВКЛ</button>
+            </div>
+        </div>
+
+        <div class="settings-divider"></div>
+        <div class="settings-section-title">📳 Вибрация</div>
+
+        <div class="settings-row">
+            <div class="settings-label">
+                <span class="settings-label-icon">📳</span>
+                <span>Вибрация</span>
+            </div>
+            <div class="settings-control">
+                <button class="toggle-btn active" id="vibro-toggle">ВКЛ</button>
+            </div>
+        </div>
+
+        <div class="settings-row">
+            <div class="settings-label">
+                <span class="settings-label-icon">💪</span>
+                <span>Интенсивность</span>
+            </div>
+            <div class="settings-control">
+                <div class="vibro-levels" id="vibro-levels">
+                    <button class="vibro-lvl" data-level="light">Слабая</button>
+                    <button class="vibro-lvl active" data-level="medium">Средняя</button>
+                    <button class="vibro-lvl" data-level="heavy">Сильная</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="settings-test-btn" id="settings-test">🔊 Тест звука и вибрации</button>
+
+    </div>
+</div>
+
+<!-- ДИАЛОГ СОХРАНЕНИЯ -->
+<div id="save-dialog">
+    <div class="box">
+        <div class="icon">💾</div>
+        <h2>Найдено сохранение!</h2>
+        <p>Персонаж: <span id="sd-name">Герой</span><br>Уровень: <span id="sd-level">1</span> • Глубина: <span id="sd-depth">0</span></p>
+        <div class="btn-group">
+            <button class="btn-continue" id="sd-continue">▶️ Продолжить</button>
+            <button class="btn-new" id="sd-new">🔄 Начать заново</button>
+        </div>
+    </div>
+</div>
+
+<!-- ДИАЛОГ ВЫБОРА УРОВНЯ -->
+<div id="level-dialog">
+    <div class="box">
+        <div class="icon">⚔️</div>
+        <h2>Выбери уровень</h2>
+        <p id="level-info">Доступно уровней: <span id="lv-available">1</span><br>Стоимость: 10💰 за уровень</p>
+        <div class="level-list" id="level-list"></div>
+        <div class="btn-group">
+            <button class="btn-enter" id="lv-enter">⬇️ Войти</button>
+            <button class="btn-cancel" id="lv-cancel">✕ Отмена</button>
+        </div>
+    </div>
+</div>
+
+<!-- ЭКРАН АВТОРИЗАЦИИ -->
+<div id="auth-screen">
+    <div class="logo">⚔️</div>
+    <h1>TG-RPG</h1>
+    <div class="subtitle">Приключение начинается здесь</div>
+    <button class="auth-btn" id="auth-btn">🔐 Войти через Telegram</button>
+    <div class="telegram-info">
+        <div>Авторизация через Telegram</div>
+        <div class="user" id="auth-user"></div>
+    </div>
+    <div class="version-info">v4.5.0</div>
+</div>
+
+<!-- ЭКРАН СОЗДАНИЯ ПЕРСОНАЖА -->
+<div id="create-screen">
+    <div class="title">📝 Создание персонажа</div>
+    <div class="subtitle" id="create-sub">Выбери имя и класс</div>
+
+    <!-- Превью спрайта выбранного класса -->
+    <div class="class-preview">
+        <canvas id="preview-canvas" width="144" height="144"></canvas>
+        <div class="class-preview-name" id="preview-name">Мечник</div>
+        <div class="class-preview-stats" id="preview-stats">❤️160  💧30  ⚔️30  🛡️10</div>
+    </div>
+
+    <div class="input-group">
+        <label>Имя героя</label>
+        <input type="text" id="hero-name" placeholder="Введите имя..." maxlength="16">
+    </div>
+    <div class="input-group">
+        <label>Класс</label>
+        <div class="class-select">
+            <div class="class-btn selected" data-class="warrior"><span class="icon">⚔️</span><span class="name">Мечник</span></div>
+            <div class="class-btn" data-class="mage"><span class="icon">🔮</span><span class="name">Маг</span></div>
+            <div class="class-btn" data-class="archer"><span class="icon">🏹</span><span class="name">Лучник</span></div>
+        </div>
+    </div>
+    <div class="btn-group">
+        <button class="create-btn" id="create-btn">🚀 Начать</button>
+        <button class="load-btn" id="load-btn" style="display:none">💾 Продолжить</button>
+        <button class="reset-btn" id="reset-btn" style="display:none">🗑️ Начать заново</button>
+    </div>
+</div>
+
+<!-- КНОПКА ПАУЗЫ (в игре) -->
+<button id="pause-btn">☰</button>
+
+<!-- ЭКРАН ПАУЗЫ -->
+<!-- ЭКРАН ПЕРСОНАЖА (Статы / Инвентарь / Экипировка) -->
+<div id="stat-screen">
+    <div class="stat-header">
+        <div class="stat-title" id="stat-title">🎒 Персонаж</div>
+        <button class="stat-close-btn" id="stat-close">✕</button>
+    </div>
+
+    <div class="stat-tabs">
+        <div class="stat-tab active" data-tab="stats">⬆️ Статы</div>
+        <div class="stat-tab" data-tab="equip">🗡️ Экипировка</div>
+        <div class="stat-tab" data-tab="inv">🎒 Инвентарь</div>
+    </div>
+
+    <!-- Вкладка статов -->
+    <div id="stat-tab-stats" class="stat-tab-content active">
+        <div class="stat-level" id="stat-level">Уровень 1</div>
+        <div class="stat-points-left" id="stat-points-wrap" style="display:none">
+            Очков: <span id="stat-points-left">0</span>
+        </div>
+        <div class="stat-list" id="stat-list"></div>
+        <button class="stat-confirm-btn" id="stat-confirm">✅ Применить</button>
+        <div class="stat-hint" id="stat-hint"></div>
+    </div>
+
+    <!-- Вкладка экипировки -->
+    <div id="stat-tab-equip" class="stat-tab-content">
+        <div class="eq-slots" id="eq-slots"></div>
+        <div class="eq-bonus-info" id="eq-bonus-info"></div>
+    </div>
+
+    <!-- Вкладка инвентаря -->
+    <div id="stat-tab-inv" class="stat-tab-content">
+        <div class="inv-grid" id="inv-grid"></div>
+        <div class="inv-empty" id="inv-empty" style="display:none">Инвентарь пуст</div>
+    </div>
+</div>
+
+<div id="pause-screen">
+    <div class="pause-title">⏸ Пауза</div>
+    <button class="menu-btn menu-btn-secondary" id="pause-continue">
+        <span class="btn-icon">▶️</span>
+        <span class="btn-text">Продолжить<span class="btn-sub">Вернуться в игру</span></span>
+    </button>
+    <button class="menu-btn menu-btn-settings" id="pause-settings">
+        <span class="btn-icon">⚙️</span>
+        <span class="btn-text">Настройки<span class="btn-sub">Звук и вибрация</span></span>
+    </button>
+    <button class="menu-btn menu-btn-secondary" id="pause-menu">
+        <span class="btn-icon">🏠</span>
+        <span class="btn-text">Главное меню<span class="btn-sub">Прогресс сохранён</span></span>
+    </button>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+    <div class="hb">
+        <div class="hr"><span class="hl">HP</span><div class="bar"><div class="fill" id="fhp" style="background:#c83232;width:100%"></div></div><span id="thp" style="font-size:8px;color:#ff8888;min-width:40px"></span></div>
+        <div class="hr"><span class="hl">MP</span><div class="bar"><div class="fill" id="fmp" style="background:#3c78dc;width:100%"></div></div><span id="tmp" style="font-size:8px;color:#88aaff;min-width:40px"></span></div>
+        <div class="hr"><span class="hl">XP</span><div class="bar"><div class="fill" id="fxp" style="background:#e6c832;width:0%"></div></div></div>
+    </div>
+    <div class="sep"></div>
+    <div class="hb">
+        <div class="st" id="slv">Ур.1</div>
+        <div class="st" id="sat">⚔20 🛡5</div>
+        <div class="st" id="s-gold">💰0</div>
+        <button id="hud-stat-btn" onclick="openStatScreen()">⬆️ +<span id="hud-stat-count">0</span></button>
+    </div>
+    <div class="sep"></div>
+    <div class="hb">
+        <div class="st" id="s-loc">📍 Деревня</div>
+        <div class="st" id="s-depth">⚔ 0</div>
+        <div class="st" id="s-maxdepth">🏆 0</div>
+        <div class="st" id="s-res">🪨0 🪵0 💎0</div>
+        <div class="st" id="s-ach">🏆</div>
+        <div class="st" id="s-quests">📋</div>
+        <div class="st" id="s-save">💾</div>
+    </div>
+</div>
+
+<!-- Трекер квеста -->
+<div id="quest-tracker"><div id="qt-name"></div><div id="qt-progress"></div></div>
+
+<!-- Управление: инвентарь + джойстик + кнопки -->
+<div id="ctrl">
+    <!-- Строка инвентаря -->
+    <div id="quickbar">
+        <div class="qsl" id="qs0"><div class="qsl-icon">🧪</div><div class="qsl-val" id="qv0">0</div><div class="qsl-label">HP</div><div class="qsl-cooldown" id="cd0"></div></div>
+        <div class="qsl" id="qs1"><div class="qsl-icon">💧</div><div class="qsl-val" id="qv1">0</div><div class="qsl-label">MP</div><div class="qsl-cooldown" id="cd1"></div></div>
+    </div>
+    <!-- Джойстик + кнопки -->
+    <div id="ctrl-bottom">
+        <div id="joy"><div id="knob"></div></div>
+        <div id="btns">
+            <div id="btns-combat">
+                <button class="ab" id="ba">⚔️</button>
+                <button class="ab ab-ability" id="bs">
+                    <span id="bs-icon">🔥</span>
+                    <div class="ab-cooldown" id="bs-cooldown"></div>
+                </button>
+            </div>
+            <button id="ctx-btn"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно -->
+<div id="modal">
+    <div id="mbox">
+        <div id="mtitle"></div>
+        <div id="msub"></div>
+        <div id="mbody"></div>
+        <div id="mclose">✕ Закрыть</div>
+    </div>
+</div>
+
+<!-- Уведомления -->
+<div id="qnotif"></div>
+
+<!-- Индикатор сохранения -->
+<div id="save-indicator">💾 Сохранено</div>
+
+<!-- Смерть -->
+<div id="dead">
+    <h1>💀 ВЫ ПОГИБЛИ</h1>
+    <p>Враги оказались сильнее...</p>
+    <button id="rbtn">Начать заново</button>
+</div>
+
+<!-- Затемнение -->
+<div id="fade-overlay"></div>
+
+<!-- Canvas -->
+<canvas id="canvas"></canvas>
+
+<!-- ============================================================ -->
+<!--  SCRIPTS -->
+<!-- ============================================================ -->
+
+<!-- Конфиг -->
+<script src="js/config.js"></script>
+<script src="js/config/TilesConfig.js"></script>
+<script src="js/config/ClassesConfig.js"></script>
+<script src="js/config/ItemsConfig.js"></script>
+<script src="js/config/MastersConfig.js"></script>
+<script src="js/config/EnemiesConfig.js"></script>
+<script src="js/config/NamesConfig.js"></script>
+
+<!-- Telegram -->
+<script src="js/telegram/Haptic.js"></script>
+<script src="js/telegram/Auth.js"></script>
+
+<!-- Core -->
+<script src="js/core/Particle.js"></script>
+<script src="js/core/FText.js"></script>
+<script src="js/core/NPC.js"></script>
+<script src="js/core/Item.js"></script>
+<script src="js/core/Enemy.js"></script>
+<script src="js/combat/DamageFormula.js"></script>
+<script src="js/core/Player.js"></script>
+
+<!-- World -->
+<script src="js/world/Village.js"></script>
+<script src="js/world/House.js"></script>
+<script src="js/world/Dungeon.js"></script>
+<script src="js/world/Portal.js"></script>
+
+<!-- Systems -->
+<script src="js/systems/Achievements.js"></script>
+<script src="js/systems/Quests.js"></script>
+<script src="js/systems/Shop.js"></script>
+<script src="js/systems/Masters.js"></script>
+<script src="js/systems/Save.js"></script>
+
+<!-- UI -->
+<script src="js/ui/Input.js"></script>
+<script src="js/ui/HUD.js"></script>
+<script src="js/ui/Modal.js"></script>
+
+<!-- Utils -->
+<script src="js/utils/SpriteConfig.js"></script>
+<script src="js/utils/SpriteEngine.js"></script>
+<script src="js/utils/Pathfinding.js"></script>
+<script src="js/utils/Canvas.js"></script>
+
+<!-- Main -->
+<script src="js/main.js"></script>
+
+</body>
+</html>

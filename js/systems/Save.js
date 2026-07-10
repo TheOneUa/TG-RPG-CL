@@ -1,0 +1,168 @@
+// ============================================================
+//  SAVE SYSTEM
+// ============================================================
+const SAVE_KEY     = 'tg_rpg_v4';
+const SAVE_VERSION = 2; // Увеличивать при несовместимых изменениях схемы
+
+function getSaveData() {
+    const p = G.p;
+    return {
+        saveVersion: SAVE_VERSION,
+        version: VERSION,
+        playerData: playerData,
+        maxDepthReached: maxDepthReached,
+        hp: p.hp, mp: p.mp,
+        maxhp: p.maxhp, maxmp: p.maxmp,
+        atk: p.atk, def: p.def, spd: p.spd,
+        lv: p.lv, exp: p.exp, exn: p.exn,
+        gold: p.gold, bag: p.bag, statPoints: p.statPoints ?? 0,
+        inventory: p.inventory ?? [], equipment: p.equipment ?? { weapon:null, armor:null, ring:null },
+        itemUpgrades: p.itemUpgrades ?? {}, enchants: p.enchants ?? {},
+        _enchantCrit: p._enchantCrit ?? 0, _enchantMpRegen: p._enchantMpRegen ?? 0,
+        _atkSpdStat: p._atkSpdStat ?? 0,
+        resources: p.resources ?? { ore:0, wood:0, essence:0 },
+        masterLevels: p.masterLevels,
+        depth: G.depth,
+        questState: questState,
+        activeQuests: activeQuests,
+        questGenerationDepth: questGenerationDepth,
+        questProgress: questProgress,
+        stats: stats,
+        achievements: achievements
+    };
+}
+
+function applySaveData(d) {
+    if (!d || typeof d !== 'object') return false;
+
+    // BUG-055: проверка совместимости версии сохранения
+    const sv = d.saveVersion ?? 1;
+    if (sv < SAVE_VERSION) {
+        console.warn(`[Save] Старое сохранение v${sv}, текущая схема v${SAVE_VERSION} — мигрируем`);
+        _migrateSave(d, sv);
+    }
+
+    const p = G.p;
+    playerData = d.playerData ?? playerData;
+
+    // Класс — восстанавливаем ДО перезаписи статов
+    p.initFromClass(playerData.class ?? 'warrior');
+
+    // BUG-029: используем ?? вместо || чтобы корректно обрабатывать значения 0
+    maxDepthReached  = d.maxDepthReached ?? 0;
+    p.hp             = d.hp   ?? p.maxhp;
+    p.mp             = d.mp   ?? p.maxmp;
+    p.maxhp          = d.maxhp ?? p.maxhp;
+    p.maxmp          = d.maxmp ?? p.maxmp;
+    p.atk            = d.atk  ?? p.atk;
+    p.def            = d.def  ?? p.def;
+    p.spd            = d.spd  ?? p.spd;
+    p.lv             = d.lv   ?? 1;
+    p.exp            = d.exp  ?? 0;
+    p.exn            = d.exn  ?? 100;
+    p.gold           = d.gold ?? 0;
+    p.statPoints     = d.statPoints ?? 0;
+    p._enchantCrit   = d._enchantCrit   ?? 0;
+    p._enchantMpRegen = d._enchantMpRegen ?? 0;
+    p._atkSpdStat    = d._atkSpdStat    ?? 0;
+
+    p.bag = d.bag
+        ? { hpPot: d.bag.hpPot ?? 0, mpPot: d.bag.mpPot ?? 0 }
+        : { hpPot: 0, mpPot: 0 };
+
+    p.inventory    = Array.isArray(d.inventory)  ? d.inventory  : [];
+    p.equipment    = d.equipment ?? { weapon: null, armor: null, ring: null };
+    p.itemUpgrades = d.itemUpgrades ?? {};
+    p.enchants     = d.enchants     ?? {};
+    p.resources    = d.resources    ?? { ore: 0, wood: 0, essence: 0 };
+
+    const defML = { atk:0, def:0, maxhp:0, maxmp:0, spd:0, atkSpd:0 };
+    if (d.masterLevels) {
+        p.masterLevels = {
+            smith: { ...defML, ...d.masterLevels.smith },
+            elf:   { ...defML, ...d.masterLevels.elf   },
+            witch: { ...defML, ...d.masterLevels.witch  },
+        };
+    } else {
+        p.masterLevels = { smith: {...defML}, elf: {...defML}, witch: {...defML} };
+    }
+
+    p.recalcEqBonus();
+
+    G.depth = d.depth ?? 0;
+    stats   = d.stats ?? { totalKills:0, totalGold:0, maxDepth:0, bossKills:0, maxLevel:1, itemsCollected:0 };
+    achievements = d.achievements ?? {};
+
+    if (Array.isArray(d.activeQuests) && d.activeQuests.length > 0) {
+        activeQuests          = d.activeQuests;
+        questState            = d.questState ?? {};
+        questGenerationDepth  = d.questGenerationDepth ?? 0;
+        questProgress         = d.questProgress ?? { kills:{}, bossKillsQ:0, goldEarned:0, maxDepthQ:0 };
+    }
+
+    return true;
+}
+
+// Миграция старых сохранений
+function _migrateSave(d, fromVersion) {
+    if (fromVersion < 2) {
+        // v1→v2: bag мог содержать sword/shield — убираем
+        if (d.bag) { delete d.bag.sword; delete d.bag.shield; }
+        // Инициализируем новые поля если отсутствуют
+        d.inventory    = d.inventory    ?? [];
+        d.equipment    = d.equipment    ?? { weapon: null, armor: null, ring: null };
+        d.itemUpgrades = d.itemUpgrades ?? {};
+        d.enchants     = d.enchants     ?? {};
+        d.statPoints   = d.statPoints   ?? 0;
+        d.questProgress = d.questProgress ?? { kills:{}, bossKillsQ:0, goldEarned:0, maxDepthQ:0 };
+    }
+}
+
+function hasSave() {
+    try { return localStorage.getItem(SAVE_KEY) !== null; } catch(e) { return false; }
+}
+
+function saveGame(show = true) {
+    try {
+        const data = getSaveData();
+        localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+        if (show) showSaveIndicator('💾 Сохранено');
+        return true;
+    } catch(e) {
+        console.error('[Save] Ошибка сохранения:', e);
+        return false;
+    }
+}
+
+function loadGame() {
+    try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return false;
+        const data = JSON.parse(raw);
+        // BUG-056: проверяем результат applySaveData
+        const ok = applySaveData(data);
+        if (!ok) {
+            console.warn('[Save] applySaveData вернул false — данные повреждены');
+            return false;
+        }
+        return true;
+    } catch(e) {
+        console.error('[Save] Ошибка загрузки:', e);
+        return false;
+    }
+}
+
+function resetSave() {
+    try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+}
+
+function showSaveIndicator(text) {
+    const el = document.getElementById('save-indicator');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.add('show');
+    clearTimeout(window._saveTimer);
+    window._saveTimer = setTimeout(() => el.classList.remove('show'), 1500);
+}
+
+window.addEventListener('beforeunload', () => saveGame(false));
