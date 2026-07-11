@@ -73,3 +73,17 @@ function rollLoot(isBoss, depth) {
     }
     return drops;
 }
+
+// Строка вида "⚔️+5 🛡️+2" для отображения бонусов предмета.
+// Используется: ui/CharScreen (экипировка/инвентарь) и systems/Masters (улучшение).
+function _itemStatStr(def) {
+    if (!def) return '';
+    const parts = [];
+    if (def.atk)    parts.push('⚔️+' + def.atk);
+    if (def.def)    parts.push('🛡️+' + def.def);
+    if (def.hp)     parts.push('❤️+' + def.hp);
+    if (def.mp)     parts.push('💧+' + def.mp);
+    if (def.spd)    parts.push('💨+' + def.spd);
+    if (def.atkSpd) parts.push('⚡+' + def.atkSpd);
+    return parts.join(' ');
+}

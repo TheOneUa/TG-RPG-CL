@@ -57,3 +57,17 @@ const ABILITIES = {
         regenPerSec: 0.02    // дополнительный реген %maxHP/сек на время dur
     }
 };
+
+// ============================================================
+//  STAT_GAINS — прибавки за 1 очко стата по классам
+// ============================================================
+// Используется: ui/CharScreen (распределение очков) и
+// systems/Masters (иконки бонусов от экипировки).
+const STAT_GAINS = {
+    hp:  { warrior: 20, archer: 15, mage: 10, icon: '❤️', name: 'Здоровье',  field: 'maxhp' },
+    mp:  { warrior: 5,  archer: 8,  mage: 15, icon: '💧', name: 'Мана',      field: 'maxmp' },
+    atk: { warrior: 5,  archer: 4,  mage: 4,  icon: '⚔️', name: 'Атака',     field: 'atk'  },
+    def: { warrior: 3,  archer: 2,  mage: 1,  icon: '🛡️', name: 'Защита',    field: 'def'  },
+    spd:    { warrior: 0.15, archer: 0.25, mage: 0.25, icon: '💨', name: 'Скорость',       field: 'spd'    },
+    atkSpd: { warrior: 0.15, archer: 0.20, mage: 0.15, icon: '⚡', name: 'Скорость атаки', field: '_atkSpdStat' },
+};
